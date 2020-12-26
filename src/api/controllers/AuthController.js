@@ -4,18 +4,22 @@ const {
   WebTokenService,
 } = require('../../services')
 const { User } = require('../models')
+const config = require('../../config')
 
 exports.sendCode = async (req, res) => {
   const { phone } = req.body
-
   try {
-    if (process.env.NODE_ENV !== 'production')
-      return res.status(200).json({ message: 'Your code is 000000' })
+    if (!config.twilio.activated)
+      return res
+        .status(200)
+        .json({ message: 'Your code is any 6 digits code !' })
     await TwilioService.sendVerificationCode(phone)
     return res
       .status(200)
       .json({ message: 'Verification code sent succesfully' })
   } catch (error) {
+    if (error.status && error.status === 400)
+      return res.status(400).json({ message: 'Invalid phone number' })
     LoggerService.serverError(error)
     return res.status(500).json({ message: 'Server Error' })
   }
@@ -25,7 +29,7 @@ exports.chekCode = async (req, res) => {
   const { phone, code } = req.body
 
   try {
-    if (process.env.NODE_ENV === 'production') {
+    if (config.twilio.activated) {
       const response = await TwilioService.checkVerificationCode(
         phone,
         code,
@@ -39,10 +43,6 @@ exports.chekCode = async (req, res) => {
           .status(400)
           .json({ message: 'Wrong code, please try again' })
     }
-    if (code !== '000000')
-      return res
-        .status(400)
-        .json({ message: 'Wrong code, please try again' })
 
     const user = await User.findOne({ phone })
     if (!user)
@@ -54,7 +54,10 @@ exports.chekCode = async (req, res) => {
       .status(200)
       .json({ message: 'Welcome back', user, accessToken })
   } catch (error) {
-    if (error.status === 404) {
+    if (
+      (error.status && error.status === 404) ||
+      error.status === 400
+    ) {
       return res
         .status(400)
         .json({ message: 'Wrong code, please try again' })

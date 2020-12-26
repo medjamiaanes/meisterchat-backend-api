@@ -8,6 +8,7 @@ const config = {
     accountSid: ENV.TWILIO_ACCOUNTSID,
     serviceId: ENV.TWILIO_SERVICEID,
     authToken: ENV.TWILIO_AUTHTOKEN,
+    activated: ENV.TWILIO_ACTIVATED && ENV.TWILIO_ACTIVATED === 'YES',
   },
 }
 
