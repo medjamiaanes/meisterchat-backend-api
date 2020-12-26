@@ -11,6 +11,7 @@ const cors = require('cors')
  */
 const config = require('./config')
 const { DatabaseService, LoggerService } = require('./services')
+const { LogMiddleware } = require('./api/middlewares')
 
 // serverConfig: development, staging, production
 const allowedConfigs = ['development', 'staging', 'production']
@@ -46,7 +47,7 @@ app.use(bodyParser.json())
 
 const { AuthRouter } = require('./api/routes')
 
-app.use('/auth', AuthRouter)
+app.use('/backend/api/auth', LogMiddleware, AuthRouter)
 
 server.listen(config.port, () => {
   if (!allowedConfigs.includes(serverConfig)) {
