@@ -1,10 +1,17 @@
-const database = require('../config/Database')
+const mongoose = require('mongoose')
+const dbConfig = require('../config/Connection')
 
 const DatabaseService = () => {
   const allowedConfigs = ['development', 'staging', 'production']
   const serverConfig = process.env.SERVER_CONFIG || 'production'
 
-  const authenticateDB = () => database.authenticate()
+  const authenticateDB = () => {
+    const { database, host, port } = dbConfig[serverConfig]
+    return mongoose.connect(`mongodb://${host}:${port}/${database}`, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    })
+  }
 
   const errorDBStart = (err) => {
     console.info('unable to connect to the database:', err)
@@ -24,6 +31,7 @@ const DatabaseService = () => {
         await wrongEnvironment()
       }
       await authenticateDB()
+      console.info('Connected to database')
     } catch (err) {
       errorDBStart(err)
     }

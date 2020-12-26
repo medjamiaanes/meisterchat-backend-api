@@ -2,8 +2,13 @@ const { NODE_ENV } = process.env
 const ENV = process.env
 
 const config = {
-  migrate: false,
-  port: NODE_ENV === 'production' ? ENV.SERVER_PORT : 4200,
+  port: NODE_ENV === 'production' ? ENV.PORT : 3300,
+  jwtSecret: ENV.JWT_SECRET,
+  twilio: {
+    accountSid: ENV.TWILIO_ACCOUNTSID,
+    serviceId: ENV.TWILIO_SERVICEID,
+    authToken: ENV.TWILIO_AUTHTOKEN,
+  },
 }
 
 module.exports = config

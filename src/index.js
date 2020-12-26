@@ -44,6 +44,10 @@ app.use(
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
+const { AuthRouter } = require('./api/routes')
+
+app.use('/auth', AuthRouter)
+
 server.listen(config.port, () => {
   if (!allowedConfigs.includes(serverConfig)) {
     LoggerService.logger.error(
