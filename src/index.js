@@ -11,7 +11,7 @@ const cors = require('cors')
  */
 const config = require('./config')
 const { DatabaseService, LoggerService } = require('./services')
-const { LogMiddleware } = require('./api/middlewares')
+const { LogMiddleware, AuthMiddleware } = require('./api/middlewares')
 
 // serverConfig: development, staging, production
 const allowedConfigs = ['development', 'staging', 'production']
@@ -45,10 +45,14 @@ app.use(
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
-const { AuthRouter } = require('./api/routes')
+const { AuthRouter, InboxRouter } = require('./api/routes')
 
 app.use('/backend/api/auth', LogMiddleware, AuthRouter)
-
+app.use(
+  '/backend/api/inbox',
+  [LogMiddleware, AuthMiddleware.verifyToken],
+  InboxRouter,
+)
 server.listen(config.port, () => {
   if (!allowedConfigs.includes(serverConfig)) {
     LoggerService.logger.error(
