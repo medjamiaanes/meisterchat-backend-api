@@ -3,6 +3,7 @@ const ENV = process.env
 
 const config = {
   port: NODE_ENV === 'production' ? ENV.PORT : 3300,
+  routerPrefix: ENV.ROUTER_PREFIX || '/backend/api',
   jwtSecret: ENV.JWT_SECRET,
   twilio: {
     accountSid: ENV.TWILIO_ACCOUNTSID,
