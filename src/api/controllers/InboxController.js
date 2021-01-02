@@ -3,11 +3,11 @@ const { LoggerService } = require('../../services')
 
 exports.fetch = async (req, res) => {
   try {
-    console.log(req.user)
     const inbox = await Inbox.findOne({
       user: req.user._id,
     }).populate('chats.user')
-    return res.status(200).json(inbox)
+    if (!inbox) return res.status(204).json([])
+    return res.status(200).json(inbox.chats)
   } catch (error) {
     LoggerService.serverError(error)
     return res.status(500).json({ message: 'Server Error' })
