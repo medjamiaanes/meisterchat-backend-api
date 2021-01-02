@@ -78,8 +78,11 @@ exports.register = async (req, res) => {
   try {
     const create = new User({ phone, username, email })
     const user = await create.save()
-    const accessToken = WebTokenService.sign({ ...user }, 3600 * 24)
-    const { _v, _id, ...userPayload } = user
+    const accessToken = WebTokenService.sign(
+      { ...user._doc },
+      3600 * 24,
+    )
+    const { _v, _id, ...userPayload } = user._doc
     return res.status(200).json({
       message: 'Welcome newbie',
       user: userPayload,
