@@ -45,13 +45,22 @@ app.use(
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
-const { AuthRouter, InboxRouter } = require('./api/routes')
+const {
+  AuthRouter,
+  InboxRouter,
+  UserRouter,
+} = require('./api/routes')
 
-app.use('/backend/api/auth', LogMiddleware, AuthRouter)
+app.use(`${config.routerPrefix}/auth`, LogMiddleware, AuthRouter)
 app.use(
-  '/backend/api/inbox',
+  `${config.routerPrefix}/inbox`,
   [LogMiddleware, AuthMiddleware.verifyToken],
   InboxRouter,
+)
+app.use(
+  `${config.routerPrefix}/user`,
+  [LogMiddleware, AuthMiddleware.verifyToken],
+  UserRouter,
 )
 server.listen(config.port, () => {
   if (!allowedConfigs.includes(serverConfig)) {
