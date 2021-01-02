@@ -9,6 +9,8 @@ exports.verifyToken = (req, res, next) => {
   try {
     const verify = WebTokenService.verify(token)
     if (!verify) return res.status(403).send('Forbidden')
+    const { _v, ...user } = verify
+    req.user = user
     return next()
   } catch (error) {
     LoggerService.serverError(error)
