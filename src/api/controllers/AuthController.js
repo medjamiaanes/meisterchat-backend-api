@@ -48,11 +48,16 @@ exports.chekCode = async (req, res) => {
     if (!user)
       return res.status(200).json({ message: 'You need to register' })
 
-    const accessToken = WebTokenService.sign({ ...user }, 3600 * 24)
-
-    return res
-      .status(200)
-      .json({ message: 'Welcome back', user, accessToken })
+    const accessToken = WebTokenService.sign(
+      { ...user._doc },
+      3600 * 24,
+    )
+    const { _v, _id, ...userPayload } = user._doc
+    return res.status(200).json({
+      message: 'Welcome back',
+      user: userPayload,
+      accessToken,
+    })
   } catch (error) {
     if (
       (error.status && error.status === 404) ||
@@ -74,10 +79,12 @@ exports.register = async (req, res) => {
     const create = new User({ phone, username, email })
     const user = await create.save()
     const accessToken = WebTokenService.sign({ ...user }, 3600 * 24)
-
-    return res
-      .status(200)
-      .json({ message: 'Welcome newbie', user, accessToken })
+    const { _v, _id, ...userPayload } = user
+    return res.status(200).json({
+      message: 'Welcome newbie',
+      user: userPayload,
+      accessToken,
+    })
   } catch (error) {
     LoggerService.serverError(error)
     return res.status(500).json({ message: 'Server Error' })
