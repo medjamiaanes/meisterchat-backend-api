@@ -6,7 +6,7 @@ exports.fetch = async (req, res) => {
     const inbox = await Inbox.findOne({
       user: req.user._id,
     }).populate('chats.user')
-    if (!inbox) return res.status(204).json([])
+    if (!inbox) return res.status(200).json([])
     return res.status(200).json(inbox.chats)
   } catch (error) {
     LoggerService.serverError(error)
@@ -22,12 +22,12 @@ exports.addChat = async (req, res) => {
     if (inbox) {
       await Inbox.updateOne(
         { _id: inbox._id },
-        { $set: { chats: [{ user: userId, messages: [] }] } },
+        { $push: { chats: { user: userId, messages: [] } } },
       )
       inbox = await Inbox.findOne({
         user: req.user._id,
       }).populate('chats.user')
-      return res.status(200).json(inbox)
+      return res.status(200).json(inbox.chats)
     }
     inbox = new Inbox({
       user: req.user._id,
@@ -37,7 +37,25 @@ exports.addChat = async (req, res) => {
     inbox = await Inbox.findOne({
       user: req.user._id,
     }).populate('chats.user')
-    return res.status(201).json(inbox)
+    return res.status(201).json(inbox.chats)
+  } catch (error) {
+    LoggerService.serverError(error)
+    return res.status(500).json({ message: 'Server Error' })
+  }
+}
+
+exports.removeChat = async (req, res) => {
+  const { userId } = req.query
+  try {
+    await Inbox.updateOne(
+      { user: req.user._id },
+      { $pull: { chats: { user: userId } } },
+    )
+    const inbox = await Inbox.findOne({
+      user: req.user._id,
+    }).populate('chats.user')
+
+    return res.status(200).json(inbox.chats)
   } catch (error) {
     LoggerService.serverError(error)
     return res.status(500).json({ message: 'Server Error' })
